@@ -1,7 +1,7 @@
 # Intermediate Power Computing (Project Repository)
 
-There really isn't too much here, as of now (I plan to fix that)
-Nevertheless, the current contents are (each has a folder):
+There really isn't too much here, as of now, (I plan to fix that)
+nevertheless, the current contents are (each has a folder):
 - _"Code Measuring"_ - simple python script for measuring how much code a block of C compiles down to
   - Uses assembly inlining in c to place ASM comments in C code
   - Comments from the C code pass down to the assembly, serving as markers or "flags"
