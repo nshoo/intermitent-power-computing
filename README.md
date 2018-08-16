@@ -1,4 +1,4 @@
-# Intermitent Power Computing (Project Repository)
+# Intermittent Power Computing (Project Repository)
 
 There really isn't too much here, as of now, (I plan to fix that)
 nevertheless, the current contents are (each has a folder):
