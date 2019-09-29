@@ -20,3 +20,10 @@ The final step is to define `SYSMEM_SIZE_SYM` as the size of the sysmem section 
 ![Sysmem](sysmem.PNG)
 
 After all the start, end, and size statements are added, and the data sections are grouped, the checkpoint routine is ready! It can be called with `SIMPLE_CHECKPOINT(pointer_to_heap_section_start, heap_section_size)`.
+
+### Drawbacks so far
+- First and foremost, there's a bug somewhere in the checkpointing code that only appears when the device is cycled on and off rapidly
+- The area on the heap to be checkpointed must be specified
+   - this could be automated in the future (?)
+- The entire global data section is checkpointed everytime, regardless of what has changed
+   - very inefficient
