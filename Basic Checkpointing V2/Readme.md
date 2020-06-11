@@ -10,13 +10,13 @@ There are three linker variables needed for the checkpoint to function properly:
 
 The first modification that must be made to the linker file is to make uninitialized and initialized data contiguous in memory. This can be done by grouping them like this:
 
-![Memory group](mem_group.PNG)
+![Memory group](mem_group.png)
 
 The start and end statements seen in the screenshot must also be added. This will define `DATA_START_SYM` and `DATA_END_SYM`.
 
 The final step is to define `SYSMEM_SIZE_SYM` as the size of the sysmem section (heap) like so:
 
-![Sysmem](sysmem.PNG)
+![Sysmem](sysmem.png)
 
 After all the start, end, and size statements are added, and the data sections are grouped, the checkpoint routine is ready! It can be called with `SIMPLE_CHECKPOINT(pointer_to_heap_section_start, heap_section_size)`.
 
