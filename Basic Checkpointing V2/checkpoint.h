@@ -29,7 +29,30 @@ struct Checkpoint {
     unsigned int heapLength;
 };
 
-inline void checkpointRegisters() __attribute__((always_inline));
+//#pragma FUNC_ALWAYS_INLINE(checkpointRegisters)
+//inline void checkpointRegisters(void) __attribute__((always_inline));
+// do register checkpointing before they get polluted by checkpointing routine itself
+// must be in header in order to be inlined by compiler
+#pragma FUNC_ALWAYS_INLINE(checkpointRegisters)
+inline void checkpointRegisters(void){
+    asm volatile (" mov.w r15, &regBackup"
+            "\n    mov.w #registers, r15"
+            "\n    mov.w r1, 2(r15)"
+            "\n    mov.w r2, 4(r15)"
+            "\n    mov.w r4, 6(r15)"
+            "\n    mov.w r5, 8(r15)"
+            "\n    mov.w r6, 10(r15)"
+            "\n    mov.w r7, 12(r15)"
+            "\n    mov.w r8, 14(r15)"
+            "\n    mov.w r9, 16(r15)"
+            "\n    mov.w r10, 18(r15)"
+            "\n    mov.w r11, 20(r15)"
+            "\n    mov.w r12, 22(r15)"
+            "\n    mov.w r13, 24(r15)"
+            "\n    mov.w r14, 26(r15)"
+            "\n    mov.w &regBackup, 28(r15)");
+}
+
 
 void checkpointStack(struct Checkpoint * current, uint8_t * sp);
 
