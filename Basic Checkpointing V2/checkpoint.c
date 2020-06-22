@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <msp430.h>
 #include "checkpoint.h"
+#include "sender.h"
 
 uint16_t registers[16] = {0};
 uint16_t regBackup;
@@ -13,26 +14,6 @@ struct Checkpoint * current = NULL;
 unsigned int index;
 #pragma DATA_SECTION(restorePointer, ".unprotected");
 uint8_t * restorePointer;
-
-// do register checkpointing before they get polluted by checkpointing routine itself
-__attribute__((always_inline)) inline void checkpointRegisters(){
-    asm volatile (" mov.w r15, &regBackup"
-            "\n    mov.w #registers, r15"
-            "\n    mov.w r1, 2(r15)"
-            "\n    mov.w r2, 4(r15)"
-            "\n    mov.w r4, 6(r15)"
-            "\n    mov.w r5, 8(r15)"
-            "\n    mov.w r6, 10(r15)"
-            "\n    mov.w r7, 12(r15)"
-            "\n    mov.w r8, 14(r15)"
-            "\n    mov.w r9, 16(r15)"
-            "\n    mov.w r10, 18(r15)"
-            "\n    mov.w r11, 20(r15)"
-            "\n    mov.w r12, 22(r15)"
-            "\n    mov.w r13, 24(r15)"
-            "\n    mov.w r14, 26(r15)"
-            "\n    mov.w &regBackup, 28(r15)");
-}
 
 // Saves stack to current checkpoint
 void checkpointStack(struct Checkpoint * temp, uint8_t * sp){
@@ -67,14 +48,16 @@ void checkpointHeap(struct Checkpoint * temp, uint8_t * start, unsigned int leng
 // Takes program state (all in RAM) and stores it to one of two checkpoint slots (whichever not disabled)
 // Recieves current sp as a parameter so as to not mess it up with its locals
 void fullCheckpoint(uint8_t * stackPointer, uint8_t * start, unsigned int length){
+    //asm volatile (" mov.w 4(SP), &registers");
+    registers[0] = *((uint16_t *) (stackPointer - 2));
     struct Checkpoint * temp = (current == &checkpoints[0]) ? &checkpoints[1] : &checkpoints[0];
     // Set checkpoint PC to the return address of this checkpoint function (always at top of stack)
-    asm volatile (" mov.w @SP, &registers");
+    //registers[0] = (uint16_t)__builtin_return_address(0);
     /* Now it's ok to add to stack so the rest of the checkpointing occurs in function calls
      * in order to avoid the unnecessary storage overhead created by "inline" */
     checkpointStack(temp, stackPointer);
     checkpointGlobals(temp);
-    checkpointHeap(temp, start, length);
+    //checkpointHeap(temp, start, length);
     // Copy over the registers to the checkpoint now that they have been safely stored
     unsigned int i;
     for(i = 0; i < 16; i++) temp->regs[i] = registers[i];
@@ -103,11 +86,11 @@ void fullRestore(){
     }
 
     // Restore Heap
-    restorePointer = current->heapStart;
+    /* restorePointer = current->heapStart;
     for(index = 0; index < current->heapLength; index++){
         *restorePointer = current->heap[index];
         restorePointer++;
-    }
+    } */
 
     //Restore registers last
     asm volatile (" mov.w #registers, r15"
