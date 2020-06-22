@@ -2,7 +2,13 @@
 #include <stdlib.h>
 #include "checkpoint.h"
 
-uint32_t shift = '\x9b';
+/* same as declaring extern but must be in assembly because
+   a C declaration would be optimized away by the compiler since they are only
+   referenced in the inline assembly */
+asm volatile (" .global registers;");
+asm volatile (" .global regBackup;");
+
+uint16_t shift = 0x9b; /* 11011011 */
 
 void pause(){
     volatile unsigned int i;
@@ -23,13 +29,14 @@ int main(void)
 	unsigned int xored;
 	long i;
 	for(i = 0; i < 5000; i++){
-	    P1OUT = BIT1;
 	    xored = ((shift >> 5) & 1U) ^ ((shift >> 4) & 1U); // second to last and fifth to last bit xor
 	    shift >>= 1;
-	    if(xored) shift |= 0x80000000;
+	    if(xored) shift |= 0x8000;
 	    SIMPLE_CHECKPOINT(0, 0);
+	    P1OUT = BIT1;
 	}
-	if(shift == 2981315693){
+	//sendInt(shift);
+	if(shift == 32282){
 	    P1OUT = BIT0;
 	} else {
 	    P1OUT = BIT0 | BIT1;
